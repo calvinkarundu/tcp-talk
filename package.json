@@ -1,0 +1,10 @@
+{
+  "name": "tcp-talk",
+  "version": "0.0.0",
+  "description": "Chatting application engine",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Calvin Karundu (https://github.com/calvinkarundu)",
+  "license": "ISC"
+}
