@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "dotenv": "1.2.0"
+    "dotenv": "1.2.0",
+    "stream-set": "1.1.0"
   },
   "author": "Calvin Karundu (https://github.com/calvinkarundu)",
   "license": "ISC"

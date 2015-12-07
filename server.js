@@ -2,14 +2,22 @@
 
 require('dotenv').load();
 var net = require('net');
+var streamSet = require('stream-set');
+
 var host = process.env.HOST || '127.0.0.1';
 var port = process.env.PORT || '5000';
+var activeSockets = streamSet();
 
 var server = net.createServer(function (socket) {
-  console.log("new connection");
+  activeSockets.add(socket);
+  console.log("connections -> " + activeSockets.size);
 
   socket.on('data', function (data) {
-    socket.write(data);
+    activeSockets.forEach(function (soc) {
+      if (soc != socket) {
+        soc.write(data);
+      }
+    });
   });
 });
 
@@ -22,7 +30,7 @@ function onError(error) {
 
 function onListening() {
   var connInfo = server.address();
-	console.log("Listening on -> " + connInfo.address + ":" + connInfo.port);
+	console.log("Listening on -> " + connInfo.address + ":" + connInfo.port + "\r\n");
 }
 
 server.listen({

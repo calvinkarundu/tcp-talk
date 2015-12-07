@@ -20,11 +20,11 @@ function onError(error) {
 
 function onConnect() {
   var connInfo = client.address();
-	console.log("Connected ( " + connInfo.address + ":" + connInfo.port + " )");
+	console.log("Connected [" + connInfo.address + ":" + connInfo.port + "]\r\n");
 }
 
 function onEnd() {
-  console.log("Connection lost!");
+  console.log("Connection lost!\r\n");
 }
 
 process.stdin.on('data', function (data) {
