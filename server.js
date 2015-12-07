@@ -1,21 +1,25 @@
 /* @flow */
 
 require('dotenv').load();
-var net = require('net');
-var streamSet = require('stream-set');
-
-var host = process.env.HOST || '127.0.0.1';
-var port = process.env.PORT || '5000';
-var activeSockets = streamSet();
+var net = require('net'),
+streamSet = require('stream-set'),
+jsonStream = require('duplex-json-stream'),
+host = process.env.HOST || '127.0.0.1',
+port = process.env.PORT || '5000',
+activeSockets = streamSet();
 
 var server = net.createServer(function (socket) {
+  socket = jsonStream(socket);
   activeSockets.add(socket);
-  console.log("connections -> " + activeSockets.size);
+  console.log("Connections[" + activeSockets.size + "]");
 
   socket.on('data', function (data) {
     activeSockets.forEach(function (soc) {
       if (soc != socket) {
-        soc.write(data);
+        soc.write({
+          user: data.user,
+          message: data.message
+        });
       }
     });
   });
