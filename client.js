@@ -4,6 +4,8 @@ require('dotenv').load();
 var net = require('net'),
 argv = require('minimist')(process.argv.slice(2)),
 lo = require('lodash'),
+util = require('util'),
+chalk = require('chalk'),
 jsonStream = require('duplex-json-stream'),
 serverHost,
 serverPort,
@@ -31,15 +33,14 @@ var client = jsonStream(
   net.connect({
     port: serverPort,
     host: serverHost
-  }, function() {
-    console.log("Connected\r\n");
   })
 );
 
 client.on('error', onError);
+client.on('connect', onConnect);
 client.on('end', onEnd);
 client.on('data', function (data) {
-  process.stdout.write("[" + data.user + "] " + data.message);
+  process.stdout.write(util.format("[%s] %s", data.user, data.message));
 });
 
 process.stdin.on('data', function (data) {
@@ -57,5 +58,9 @@ function onError(error) {
 }
 
 function onEnd() {
-  console.log("Connection lost!\r\n");
+  console.error(chalk.red("Connection lost!\r\n"));
+}
+
+function onConnect() {
+  console.log(chalk.green("\r\nConnected\r\n"));
 }

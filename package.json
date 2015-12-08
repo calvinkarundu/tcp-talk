@@ -1,7 +1,7 @@
 {
   "name": "tcp-talk",
   "version": "0.0.0",
-  "description": "Chatting application engine",
+  "description": "CLI Chat tool",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

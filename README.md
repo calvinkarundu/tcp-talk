@@ -1,3 +1,3 @@
 # tcp-talk
 
-A simple cli chat app
+A simple cli chat tool

@@ -4,6 +4,7 @@ require('dotenv').load();
 var net = require('net'),
 argv = require('minimist')(process.argv.slice(2)),
 lo = require('lodash'),
+chalk = require('chalk'),
 streamSet = require('stream-set'),
 jsonStream = require('duplex-json-stream'),
 serverHost,
@@ -32,7 +33,7 @@ var server = net.createServer(function (client) {
   client = jsonStream(client);
 
   activeClients.add(client);
-  console.log("Client connected [" + activeClients.size + " active]");
+  console.log("Client connected " + chalk.green("[%d active]"), activeClients.size);
 
   client.on('data', function (data) {
     activeClients.forEach(function (c) {
@@ -47,7 +48,7 @@ var server = net.createServer(function (client) {
 
   client.on('end', function (c) {
     var remaining = (activeClients.size - 1);
-    console.log("Client disconnected [" + remaining + " active]");
+    console.log("Client disconnected " + chalk.gray("[%d active]"), remaining);
   });
 });
 
@@ -60,7 +61,7 @@ function onError(error) {
 
 function onListening() {
   var connInfo = server.address();
-	console.log("\r\nServer address [" + connInfo.address + ":" + connInfo.port + "]");
+	console.log(chalk.green("\nReady on -> %s:%s\n"), connInfo.address, connInfo.port);
 }
 
 server.listen({
