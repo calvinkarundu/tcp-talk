@@ -1,20 +1,40 @@
 /* @flow */
 
 require('dotenv').load();
+require('lookup-multicast-dns/global');
 var net = require('net'),
-lo = require('lodash'),
 argv = require('minimist')(process.argv.slice(2)),
+lo = require('lodash'),
 jsonStream = require('duplex-json-stream'),
-host = process.env.HOST || '127.0.0.1',
-port = process.env.PORT || '5000',
+serverHost,
+serverPort,
+serverName,
 clientName;
 
-ensureOpts(argv);
-clientName = argv.u;
+//Check option arguments
+function checkOpts() {
+  if ( !lo.has(argv, 'n') || !lo.isString(argv.n) || lo.isEmpty(argv.n) ) {
+    console.log("-n [string] client name");
+    process.exit(0);
+  }
+
+  if ( !lo.has(argv, 's') || !lo.isString(argv.s) || lo.isEmpty(argv.s) ) {
+    console.log("-s [string] server to connect to");
+    process.exit(0);
+  }
+}
+checkOpts();
+
+//Load client variables
+function prepConn() {
+  serverName = argv.s || process.env.SERVER_NAME || 'tcp-talk.local';
+  serverPort = argv.p || process.env.SERVER_PORT || '8000';
+}
+prepConn();
 
 var client = net.connect({
-  port: port,
-  host: host
+  port: serverPort,
+  host: serverName
 });
 
 client.on('error', onError);
@@ -31,7 +51,7 @@ process.stdin.on('data', function (data) {
 });
 
 client.on('data', function (data) {
-  process.stdout.write(data.user + "> " + data.message);
+  process.stdout.write("[" + data.user + "] " + data.message);
 });
 
 function onError(error) {
@@ -44,16 +64,4 @@ function onConnect() {
 
 function onEnd() {
   console.log("Connection lost!\r\n");
-}
-
-function ensureOpts(opts) {
-  if ( !lo.has(opts, 'u') ) {
-    console.log("-u [string] client name");
-    process.exit(1);
-  }
-
-  if ( lo.isEmpty(opts.u) ) {
-    console.log("-u [string] client name");
-    process.exit(1);
-  }
 }
