@@ -4,53 +4,50 @@ require('dotenv').load();
 var net = require('net'),
 argv = require('minimist')(process.argv.slice(2)),
 lo = require('lodash'),
-register = require('register-multicast-dns'),
 streamSet = require('stream-set'),
 jsonStream = require('duplex-json-stream'),
 serverHost,
 serverPort,
-serverName,
-activeSockets = streamSet();
+activeClients = streamSet();
 
 //Check option arguments
-function ensureOpts() {
+function checkArgs() {
   // if ( !lo.has(argv, 's') || !lo.isString(argv.s) || lo.isEmpty(argv.s) ) {
   //   console.log("-s [string] server name");
   //   process.exit(1);
   // }
 }
-ensureOpts();
+checkArgs();
 
 //Load server variables
 function prepConn() {
-  serverHost = argv.h || process.env.SERVER_HOST || '127.0.0.1';
-  serverPort = argv.p || process.env.SERVER_PORT || '8000';
-  serverName = argv.s || process.env.SERVER_NAME || 'tcp-talk.local';
-  register(serverName);
+  serverHost = argv.h || process.env.SERVER_HOST;
+  serverPort = argv.p || process.env.SERVER_PORT;
 }
 prepConn();
 
-var server = net.createServer(function (socket) {
-  socket = jsonStream(socket);
+var server = net.createServer(function (client) {
 
-  activeSockets.add(socket);
-  console.log("Connections[" + activeSockets.size + "]");
+  // enable client to work with object stream
+  client = jsonStream(client);
 
-  var receivingSockets = activeSockets.streams;
-  console.log(receivingSockets);
-  activeSockets.remove(socket);
-  console.log(receivingSockets);
-  process.exit(0);
+  activeClients.add(client);
+  console.log("Client connected [" + activeClients.size + " active]");
 
-  socket.on('data', function (data) {
-    activeSockets.forEach(function (soc) {
-      if (soc != socket) {
-        soc.write({
+  client.on('data', function (data) {
+    activeClients.forEach(function (c) {
+      if (c != client) {
+        c.write({
           user: data.user,
           message: data.message
         });
       }
     });
+  });
+
+  client.on('end', function (c) {
+    var remaining = (activeClients.size - 1);
+    console.log("Client disconnected [" + remaining + " active]");
   });
 });
 
@@ -63,8 +60,7 @@ function onError(error) {
 
 function onListening() {
   var connInfo = server.address();
-	console.log("Server address -> " + connInfo.address + ":" + connInfo.port + "\r\n");
-  console.log("Server name -> " + serverName);
+	console.log("\r\nServer address [" + connInfo.address + ":" + connInfo.port + "]\r\n");
 }
 
 server.listen({

@@ -1,65 +1,59 @@
 /* @flow */
 
 require('dotenv').load();
-require('lookup-multicast-dns/global');
 var net = require('net'),
 argv = require('minimist')(process.argv.slice(2)),
 lo = require('lodash'),
 jsonStream = require('duplex-json-stream'),
 serverHost,
 serverPort,
-serverName,
 clientName;
 
 //Check option arguments
-function checkOpts() {
+function checkArgs() {
   if ( !lo.has(argv, 'n') || !lo.isString(argv.n) || lo.isEmpty(argv.n) ) {
     console.log("-n [string] client name");
     process.exit(0);
   }
-
-  if ( !lo.has(argv, 's') || !lo.isString(argv.s) || lo.isEmpty(argv.s) ) {
-    console.log("-s [string] server to connect to");
-    process.exit(0);
-  }
 }
-checkOpts();
+checkArgs();
 
 //Load client variables
 function prepConn() {
-  serverName = argv.s || process.env.SERVER_NAME || 'tcp-talk.local';
-  serverPort = argv.p || process.env.SERVER_PORT || '8000';
+  serverPort = argv.p || process.env.SERVER_PORT;
+  serverHost = argv.h || process.env.SERVER_HOST;
+  clientName = argv.n;
 }
 prepConn();
 
-var client = net.connect({
-  port: serverPort,
-  host: serverName
-});
+// enable client to work with object stream
+var client = jsonStream(
+  net.connect({
+    port: serverPort,
+    host: serverHost
+  }, function() {
+    console.log("Connected\r\n");
+  })
+);
 
 client.on('error', onError);
-client.on('connect', onConnect);
 client.on('end', onEnd);
-
-client = jsonStream(client);
-
-process.stdin.on('data', function (data) {
-  client.write({
-    user: clientName,
-    message: data.toString('utf8')
-  });
-});
-
 client.on('data', function (data) {
   process.stdout.write("[" + data.user + "] " + data.message);
 });
 
+process.stdin.on('data', function (data) {
+  //Convert data buffer to string
+  var message = data.toString();
+
+  client.write({
+    user: clientName,
+    message: message
+  });
+});
+
 function onError(error) {
 	console.error(error);
-}
-
-function onConnect() {
-	console.log("Connected\r\n");
 }
 
 function onEnd() {
