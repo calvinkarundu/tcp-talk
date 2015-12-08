@@ -36,7 +36,7 @@ var server = net.createServer(function (client) {
 
   client.on('data', function (data) {
     activeClients.forEach(function (c) {
-      if (c != client) {
+      if (c !== client ) {
         c.write({
           user: data.user,
           message: data.message
@@ -60,7 +60,7 @@ function onError(error) {
 
 function onListening() {
   var connInfo = server.address();
-	console.log("\r\nServer address [" + connInfo.address + ":" + connInfo.port + "]\r\n");
+	console.log("\r\nServer address [" + connInfo.address + ":" + connInfo.port + "]");
 }
 
 server.listen({

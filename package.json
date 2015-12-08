@@ -6,6 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "chalk": "1.1.1",
     "dotenv": "1.2.0",
     "duplex-json-stream": "1.0.1",
     "lodash": "3.10.1",
