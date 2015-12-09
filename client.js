@@ -9,12 +9,13 @@ chalk = require('chalk'),
 jsonStream = require('duplex-json-stream'),
 serverHost,
 serverPort,
-clientName;
+clientName,
+clientColor;
 
 //Check option arguments
 function checkArgs() {
   if ( !lo.has(argv, 'n') || !lo.isString(argv.n) || lo.isEmpty(argv.n) ) {
-    console.log("-n [string] client name");
+    console.log("\r\n-n [string] client name\r\n");
     process.exit(0);
   }
 }
@@ -33,11 +34,13 @@ var client = jsonStream(
   net.connect({
     port: serverPort,
     host: serverHost
+  }, function () {
+    //Connect Listener
+    console.log(chalk.green("\r\nConnected\r\n"));
   })
 );
 
 client.on('error', onError);
-client.on('connect', onConnect);
 client.on('end', onEnd);
 client.on('data', function (data) {
   process.stdout.write(util.format("[%s] %s", data.user, data.message));
@@ -59,8 +62,4 @@ function onError(error) {
 
 function onEnd() {
   console.error(chalk.red("Connection lost!\r\n"));
-}
-
-function onConnect() {
-  console.log(chalk.green("\r\nConnected\r\n"));
 }

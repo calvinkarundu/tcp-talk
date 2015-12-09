@@ -15,6 +15,10 @@
     "register-multicast-dns": "1.1.0",
     "stream-set": "1.1.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/calvinkarundu/tcp-talk.git"
+  },
   "author": "Calvin Karundu (https://github.com/calvinkarundu)",
   "license": "ISC"
 }
